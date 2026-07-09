@@ -1,0 +1,13 @@
+{
+  "name": "gps-telemetry-simulator",
+  "version": "1.0.0",
+  "description": "GPS coordinates simulator for fleet tracking API",
+  "main": "simulator.js",
+  "type": "module",
+  "scripts": {
+    "start": "node simulator.js"
+  },
+  "dependencies": {
+    "undici": "^6.20.0"
+  }
+}
