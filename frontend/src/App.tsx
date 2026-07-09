@@ -57,12 +57,19 @@ export default function App() {
 
   // 2. WebSocket setup
   useEffect(() => {
+    let isDisposed = false;
+
     function connectWS() {
+      if (isDisposed) return;
       console.log('Connecting to WebSocket...');
       const ws = new WebSocket(BACKEND_WS_URL);
       wsRef.current = ws;
 
       ws.onopen = () => {
+        if (isDisposed) {
+          ws.close();
+          return;
+        }
         console.log('WebSocket connected!');
         setConnectionStatus('ws');
         // Clear any active REST polling interval if we successfully connect
@@ -73,6 +80,7 @@ export default function App() {
       };
 
       ws.onmessage = (event) => {
+        if (isDisposed) return;
         try {
           const message = JSON.parse(event.data);
           if (message.type === 'INIT' || message.type === 'UPDATE') {
@@ -85,6 +93,7 @@ export default function App() {
       };
 
       ws.onclose = () => {
+        if (isDisposed) return;
         console.warn('WebSocket connection closed. Switching to polling...');
         setConnectionStatus('polling');
         // Start HTTP polling
@@ -94,15 +103,15 @@ export default function App() {
         }
         // Attempt reconnect after 10 seconds
         setTimeout(() => {
-          if (wsRef.current?.readyState === WebSocket.CLOSED) {
+          if (!isDisposed && wsRef.current?.readyState === WebSocket.CLOSED) {
             connectWS();
           }
         }, 10000);
       };
 
       ws.onerror = (error) => {
+        if (isDisposed) return;
         console.error('WebSocket error:', error);
-        ws.close();
       };
     }
 
@@ -110,7 +119,19 @@ export default function App() {
 
     // Cleanup on unmount
     return () => {
-      wsRef.current?.close();
+      isDisposed = true;
+      const ws = wsRef.current;
+      if (ws) {
+        if (ws.readyState === WebSocket.CONNECTING) {
+          // If still connecting, wait for it to open then close it, preventing browser console error
+          ws.onopen = () => {
+            ws.close();
+          };
+          ws.onerror = () => {}; // Suppress connection abort error
+        } else if (ws.readyState === WebSocket.OPEN) {
+          ws.close();
+        }
+      }
       if (pollingIntervalRef.current) {
         clearInterval(pollingIntervalRef.current);
       }
