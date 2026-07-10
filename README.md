@@ -33,6 +33,14 @@ npm run dev
 
 ---
 
+## 🧪 Pruebas unitarias
+
+```bash
+npm run test:backend
+
+
+---
+
 ## 🏗️ Arquitectura 
 
 1. **Backend (Node.js + TypeScript + Express + WebSockets)**
@@ -96,7 +104,7 @@ Para evitar inconsistencias (lecturas fantasma o datos corruptos en caché) al e
 ## 🎥 Video de Sustentación
 
 Enlace al video de sustentación de la prueba:
-👉 **[Ver Video de Sustentación en YouTube (No listado)](#)** *(Reemplazar con el enlace del video real)*
+👉 **[https://youtu.be/PXu6REXAL_w]** 
 
 ---
 
